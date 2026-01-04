@@ -1,0 +1,26 @@
+MsSql
+
+localhost:1433
+Username: "sa"
+Password: "Password123!"
+
+
+PostgreSql
+
+localhost:5432
+Username: "user"
+Password: "password"
+
+
+Debezium
+
+http://localhost:8083/
+
+Kafka UI
+
+http://localhost:8080/
+
+
+
+
+

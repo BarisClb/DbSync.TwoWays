@@ -1,0 +1,14 @@
+
+MsSql
+
+Database Name: dbsync
+Table Names: test_table_1, test_table_2, test_table_3
+
+
+test_table_1: ct, column off
+test_table_2: ctc
+test_table_3: ct, column on
+
+
+
+

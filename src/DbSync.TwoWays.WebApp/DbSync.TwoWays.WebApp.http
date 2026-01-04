@@ -1,0 +1,6 @@
+@DbSync.TwoWays.WebApp_HostAddress = http://localhost:5118
+
+GET {{DbSync.TwoWays.WebApp_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

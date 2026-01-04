@@ -1,0 +1,183 @@
+
+-- MsSql
+
+CREATE DATABASE dbsync;
+GO
+USE dbsync;
+GO
+
+
+----------
+
+
+CREATE TABLE dbo.test_table_1 (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    IntColumn INT NULL,
+    TextColumn NVARCHAR(255) NULL,
+    GuidColumn UNIQUEIDENTIFIER NULL,
+    DateColumn DATETIME2 NULL,
+    TestColumn NVARCHAR(255) NULL
+);
+
+CREATE TABLE dbo.test_table_2 (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    IntColumn INT NULL,
+    TextColumn NVARCHAR(255) NULL,
+    GuidColumn UNIQUEIDENTIFIER NULL,
+    DateColumn DATETIME2 NULL,
+    TestColumn NVARCHAR(255) NULL
+);
+
+CREATE TABLE dbo.test_table_3 (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    IntColumn INT NULL,
+    TextColumn NVARCHAR(255) NULL,
+    GuidColumn UNIQUEIDENTIFIER NULL,
+    DateColumn DATETIME2 NULL,
+    TestColumn NVARCHAR(255) NULL
+);
+
+CREATE TABLE dbo.test_table_4 (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+
+    IntColumn INT NULL,
+    TextColumn NVARCHAR(255) NULL,
+    GuidColumn UNIQUEIDENTIFIER NULL,
+    DateColumn DATETIME2 NULL,
+    TestColumn NVARCHAR(255) NULL,
+
+    -- sync metadata
+    sync_origin TINYINT NULL,              -- 1 = MSSQL, 2 = PG
+    sync_event_id UNIQUEIDENTIFIER NULL,
+    sync_updated_at DATETIME2 NULL
+);
+
+CREATE UNIQUE INDEX UX_test_table_4_sync_event_id
+ON dbo.test_table_4(sync_event_id)
+WHERE sync_event_id IS NOT NULL;
+
+----------
+
+
+ALTER DATABASE DataSyncTest
+SET CHANGE_TRACKING = ON
+(
+    CHANGE_RETENTION = 7 DAYS,
+    AUTO_CLEANUP = ON
+);
+
+
+ALTER TABLE dbo.test_table_1
+ENABLE CHANGE_TRACKING
+WITH (TRACK_COLUMNS_UPDATED = OFF);
+
+
+ALTER TABLE dbo.test_table_3
+ENABLE CHANGE_TRACKING
+WITH (TRACK_COLUMNS_UPDATED = ON);
+
+
+----------
+
+
+EXEC sys.sp_cdc_enable_db;
+
+
+EXEC sys.sp_cdc_enable_table
+    @source_schema = N'dbo',
+    @source_name   = N'test_table_2',
+    @role_name     = NULL;
+
+
+----------
+
+SELECT * FROM cdc.change_tables;
+
+----------
+
+
+-- PostgreSql
+
+
+CREATE TABLE test_table_1 (
+    Id SERIAL PRIMARY KEY,
+    IntColumn INTEGER NULL,
+    TextColumn TEXT NULL,
+    GuidColumn UUID NULL,
+    DateColumn TIMESTAMP NULL,
+    TestColumn TEXT NULL
+);
+
+CREATE TABLE test_table_2 (
+    Id SERIAL PRIMARY KEY,
+    IntColumn INTEGER NULL,
+    TextColumn TEXT NULL,
+    GuidColumn UUID NULL,
+    DateColumn TIMESTAMP NULL,
+    TestColumn TEXT NULL
+);
+
+CREATE TABLE test_table_3 (
+    Id SERIAL PRIMARY KEY,
+    IntColumn INTEGER NULL,
+    TextColumn TEXT NULL,
+    GuidColumn UUID NULL,
+    DateColumn TIMESTAMP NULL,
+    TestColumn TEXT NULL
+);
+
+CREATE TABLE test_table_4 (
+    Id SERIAL PRIMARY KEY,
+
+    IntColumn INTEGER NULL,
+    TextColumn TEXT NULL,
+    GuidColumn UUID NULL,
+    DateColumn TIMESTAMP NULL,
+    TestColumn TEXT NULL,
+
+    -- sync metadata
+    sync_origin SMALLINT NULL,          -- 1 = MSSQL, 2 = PG
+    sync_event_id UUID NULL,
+    sync_updated_at TIMESTAMP NULL
+);
+
+CREATE UNIQUE INDEX ux_test_table_4_sync_event_id
+ON test_table_4(sync_event_id);
+
+----------
+
+
+CREATE PUBLICATION debezium_pub
+FOR TABLE
+    test_table_1,
+    test_table_2;
+
+
+SELECT * FROM pg_publication_tables;
+
+
+----------
+
+
+-- Test Insert
+
+
+INSERT INTO dbo.test_table_1
+(IntColumn, TextColumn, GuidColumn, DateColumn, TestColumn)
+VALUES
+(1, 'hello mssql ct', NEWID(), SYSDATETIME(), 'ct-test');
+
+INSERT INTO dbo.test_table_2
+(IntColumn, TextColumn, GuidColumn, DateColumn, TestColumn)
+VALUES
+(2, 'hello mssql cdc', NEWID(), SYSDATETIME(), 'cdc-test');
+
+
+
+
+
+
+
+
+
+
